@@ -55,3 +55,15 @@ select
 	day_of_week, -- название дня недели на английском языке
 	income --суммарная выручка продавца в определенный день недели, округленная до целого числа
 from ranged_data;
+
+--считаем количество покупателей в возрастных группах: 16-25, 26-40 и 40+
+select
+	(case
+		when c.age >= 16 and c.age <= 25 then '16-25'
+		when c.age >= 26 and c.age <=40 then '26-40'
+		else '40+'
+	end) as age_category, --возрастная группа
+    COUNT(*) as age_count --количество человек в группе
+from customers c
+group by 1
+order by 1; --сортируем данные по age_category
