@@ -67,3 +67,16 @@ select
 from customers c
 group by 1
 order by 1; --сортируем данные по age_category
+
+--считаем данные по количеству уникальных покупателей и выручке, которую они принесли. 
+select
+	to_char(s.sale_date, 'YYYY-MM') as date, --дата в числовом виде ГОД-МЕСЯЦ	
+	COUNT(distinct s.customer_id) as total_customers, --количество уникальных покупателей
+    FLOOR(SUM(p.price * s.quantity)) as income --принесенная выручка
+from sales s 
+left join customers c
+	on s.customer_id = c.customer_id
+left join products p
+	on s.product_id = p.product_id
+group by 1 --группируем данные по дате
+order by 1; --сортируем данные по дате по возрастанию 
