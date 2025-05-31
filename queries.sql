@@ -39,7 +39,7 @@ order by 2;
 with ranged_data as (
 select
 	concat(e.first_name,' ',e.last_name) as seller, --имя и фамилия продавца
-	to_char(s.sale_date, 'Day') as day_of_week, -- название дня недели на английском языке
+	to_char(s.sale_date, 'day') as day_of_week, -- название дня недели на английском языке
 	FLOOR(AVG(s.quantity * p.price)) as income, --суммарная выручка продавца в определенный день недели, округленная до целого числа
 	extract(ISODOW from s.sale_date) as number_of_day --порядковый номер дня в неделе
 from sales s
