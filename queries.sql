@@ -90,7 +90,7 @@ with tab as (
 	CONCAT(c.first_name, ' ', c.last_name) as customer,
         CONCAT(e.first_name, ' ', e.last_name) as seller,
         ROW_NUMBER() over (
-	    PARTITION by CONCAT(c.first_name, ' ', c.last_name) order by s.sale_date, s.sales_id) as sales_number
+	partition by CONCAT(c.first_name, ' ', c.last_name) order by s.sale_date, s.sales_id) as sales_number
     from sales s
     left join customers c
         on s.customer_id = c.customer_id
