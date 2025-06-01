@@ -33,8 +33,9 @@ left join employees as e
 left join products as p
     on s.product_id = p.product_id
 group by 1
-having FLOOR(AVG(s.quantity * p.price)) <
-	(select total_average_income.avg_income from total_average_income)
+having
+    FLOOR(AVG(s.quantity * p.price)) <
+    (select total_average_income.avg_income from total_average_income)
 order by 2;
 
 --получаем информацию о выручке по дням недели
@@ -64,7 +65,7 @@ select
     (case
         when c.age >= 16 and c.age <= 25 then '16-25'
         when c.age >= 26 and c.age <= 40 then '26-40'
-	else '40+'
+        else '40+'
     end) as age_category,
     COUNT(*) as age_count
 from customers as c
@@ -88,11 +89,11 @@ with tab as (
         s.sale_date,
         p.price,
         s.customer_id,
-	CONCAT(c.first_name, ' ', c.last_name) as customer,
+        CONCAT(c.first_name, ' ', c.last_name) as customer,
         CONCAT(e.first_name, ' ', e.last_name) as seller,
         ROW_NUMBER() over (
- 	    partition by CONCAT(c.first_name, ' ', c.last_name) 
-	    order by s.sale_date, s.sales_id
+            partition by CONCAT(c.first_name, ' ', c.last_name)
+            order by s.sale_date, s.sales_id
         ) as sales_number
     from sales as s
     left join customers as c
