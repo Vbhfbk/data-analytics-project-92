@@ -33,7 +33,8 @@ left join employees as e
 left join products as p
     on s.product_id = p.product_id
 group by 1
-having FLOOR(AVG(s.quantity * p.price)) < (select total_average_income.avg_income from total_average_income)
+having FLOOR(AVG(s.quantity * p.price)) <
+	(select total_average_income.avg_income from total_average_income)
 order by 2;
 
 --получаем информацию о выручке по дням недели
@@ -90,7 +91,9 @@ with tab as (
 	CONCAT(c.first_name, ' ', c.last_name) as customer,
         CONCAT(e.first_name, ' ', e.last_name) as seller,
         ROW_NUMBER() over (
-	partition by CONCAT(c.first_name, ' ', c.last_name) order by s.sale_date, s.sales_id) as sales_number
+ 	    partition by CONCAT(c.first_name, ' ', c.last_name) 
+	    order by s.sale_date, s.sales_id
+        ) as sales_number
     from sales as s
     left join customers as c
         on s.customer_id = c.customer_id
