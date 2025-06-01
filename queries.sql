@@ -18,7 +18,7 @@ limit 10;
 
 --выявляем продавцов, чья средняя выручка за сделку меньше средней
 with total_average_income as (
-    select AVG(s.quantity * p.price) as avg_income 
+    select AVG(s.quantity * p.price) as avg_income
     from sales s
     left join products p
         on s.product_id = p.product_id
@@ -33,7 +33,8 @@ left join employees e
 left join products p
     on s.product_id = p.product_id
 group by 1
-having FLOOR(AVG(s.quantity * p.price)) < (select total_average_income.avg_income from total_average_income) 
+having FLOOR(AVG(s.quantity * p.price)) < 
+(select total_average_income.avg_income from total_average_income)
 order by 2;
 
 --получаем информацию о выручке по дням недели
@@ -42,7 +43,7 @@ with ranged_data as (
         CONCAT(e.first_name, ' ', e.last_name) as seller,
         TO_CHAR(s.sale_date, 'day') as day_of_week,
         FLOOR(SUM(s.quantity * p.price)) as income,
-        EXTRACT(ISODOW from s.sale_date) as number_of_day
+        EXTRACT(isodow from s.sale_date) as number_of_day
     from sales s
     left join employees e
         on s.sales_person_id = e.employee_id
@@ -76,8 +77,6 @@ select
     COUNT(distinct s.customer_id) as total_customers,
     FLOOR(SUM(p.price * s.quantity)) as income
 from sales s
---left join customers c
-    --on s.customer_id = c.customer_id
 left join products p
     on s.product_id = p.product_id
 group by 1
@@ -91,7 +90,8 @@ with tab as (
         s.customer_id,
 	CONCAT(c.first_name, ' ', c.last_name) as customer,
         CONCAT(e.first_name, ' ', e.last_name) as seller,
-        ROW_NUMBER()OVER (PARTITION BY CONCAT(c.first_name, ' ', c.last_name) ORDER BY s.sale_date, s.sales_id) AS sales_number
+        ROW_NUMBER() OVER (PARTITION by CONCAT(c.first_name, ' ', c.last_name) 
+	order by s.sale_date, s.sales_id) as sales_number
     from sales s 
     left join customers c
         on s.customer_id = c.customer_id
@@ -102,6 +102,7 @@ with tab as (
     where p.price = 0
     order by s.customer_id
 )
+	
 select
     customer,
     sale_date,
