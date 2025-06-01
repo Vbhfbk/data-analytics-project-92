@@ -18,12 +18,12 @@ limit 10;
 
 --выявляем продавцов, чья средняя выручка за сделку меньше средней
 with total_average_income as (
-    select AVG(s.quantity * p.price)
+    select AVG(s.quantity * p.price) as avg_income 
     from sales s
     left join products p
         on s.product_id = p.product_id
 )
-	
+
 select
     CONCAT(e.first_name, ' ', e.last_name) as seller,
     FLOOR(AVG(s.quantity * p.price)) as average_income
@@ -33,21 +33,21 @@ left join employees e
 left join products p
     on s.product_id = p.product_id
 group by 1
-having FLOOR(AVG(s.quantity * p.price)) < (select * from total_average_income) 
+having FLOOR(AVG(s.quantity * p.price)) < (select total_average_income.avg_income from total_average_income) 
 order by 2;
 
 --получаем информацию о выручке по дням недели
 with ranged_data as (
     select
-        CONCAT(e.first_name,' ',e.last_name) as seller,
+        CONCAT(e.first_name, ' ', e.last_name) as seller,
         TO_CHAR(s.sale_date, 'day') as day_of_week,
         FLOOR(SUM(s.quantity * p.price)) as income,
-       EXTRACT(ISODOW from s.sale_date) as number_of_day
+        EXTRACT(ISODOW from s.sale_date) as number_of_day
     from sales s
     left join employees e
         on s.sales_person_id = e.employee_id
     left join products p
-       on s.product_id = p.product_id
+        on s.product_id = p.product_id
     group by 1, 2, 4
     order by 4, 1
 )
@@ -55,14 +55,14 @@ with ranged_data as (
 select
     seller,
     day_of_week,
-    income 
+    income
 from ranged_data;
 
 --считаем количество покупателей в возрастных группах: 16-25, 26-40 и 40+
 select
     (case
         when c.age >= 16 and c.age <= 25 then '16-25'
-	when c.age >= 26 and c.age <=40 then '26-40'
+        when c.age >= 26 and c.age <= 40 then '26-40'
 	else '40+'
     end) as age_category,
     COUNT(*) as age_count
@@ -76,8 +76,8 @@ select
     COUNT(distinct s.customer_id) as total_customers,
     FLOOR(SUM(p.price * s.quantity)) as income
 from sales s
-left join customers c
-    on s.customer_id = c.customer_id
+--left join customers c
+    --on s.customer_id = c.customer_id
 left join products p
     on s.product_id = p.product_id
 group by 1
@@ -86,11 +86,11 @@ order by 1;
 --данные покупателей, первая покупка которых была в ходе проведения акций
 with tab as (
     select
-        CONCAT(c.first_name, ' ', c.last_name) as customer,
-        CONCAT(e.first_name, ' ', e.last_name) as seller,
         s.sale_date,
         p.price,
         s.customer_id,
+	CONCAT(c.first_name, ' ', c.last_name) as customer,
+        CONCAT(e.first_name, ' ', e.last_name) as seller,
         ROW_NUMBER()OVER (PARTITION BY CONCAT(c.first_name, ' ', c.last_name) ORDER BY s.sale_date, s.sales_id) AS sales_number
     from sales s 
     left join customers c
