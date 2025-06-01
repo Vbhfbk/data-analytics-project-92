@@ -7,10 +7,10 @@ select
     CONCAT(e.first_name, ' ', e.last_name) as seller,
     COUNT(s.sales_id) as operations,
     FLOOR(SUM(s.quantity * p.price)) as income
-from sales s
-left join employees e
+from sales as s
+left join employees as e
     on s.sales_person_id = e.employee_id
-left join products p
+left join products as p
     on s.product_id = p.product_id
 group by 1
 order by 3 desc
@@ -19,18 +19,18 @@ limit 10;
 --выявляем продавцов, чья средняя выручка за сделку меньше средней
 with total_average_income as (
     select AVG(s.quantity * p.price) as avg_income
-    from sales s
-    left join products p
+    from sales as s
+    left join products as p
         on s.product_id = p.product_id
 )
 
 select
     CONCAT(e.first_name, ' ', e.last_name) as seller,
     FLOOR(AVG(s.quantity * p.price)) as average_income
-from sales s
-left join employees e
+from sales as s
+left join employees as e
     on s.sales_person_id = e.employee_id
-left join products p
+left join products as p
     on s.product_id = p.product_id
 group by 1
 having FLOOR(AVG(s.quantity * p.price)) < (select total_average_income.avg_income from total_average_income)
@@ -43,10 +43,10 @@ with ranged_data as (
         TO_CHAR(s.sale_date, 'day') as day_of_week,
         FLOOR(SUM(s.quantity * p.price)) as income,
         EXTRACT(isodow from s.sale_date) as number_of_day
-    from sales s
-    left join employees e
+    from sales as s
+    left join employees as e
         on s.sales_person_id = e.employee_id
-    left join products p
+    left join products as p
         on s.product_id = p.product_id
     group by 1, 2, 4
     order by 4, 1
@@ -66,7 +66,7 @@ select
 	else '40+'
     end) as age_category,
     COUNT(*) as age_count
-from customers c
+from customers as c
 group by 1
 order by 1;
 
@@ -75,8 +75,8 @@ select
     TO_CHAR(s.sale_date, 'YYYY-MM') as selling_month,
     COUNT(distinct s.customer_id) as total_customers,
     FLOOR(SUM(p.price * s.quantity)) as income
-from sales s
-left join products p
+from sales as s
+left join products as p
     on s.product_id = p.product_id
 group by 1
 order by 1;
@@ -91,15 +91,15 @@ with tab as (
         CONCAT(e.first_name, ' ', e.last_name) as seller,
         ROW_NUMBER() over (
 	partition by CONCAT(c.first_name, ' ', c.last_name) order by s.sale_date, s.sales_id) as sales_number
-    from sales s
-    left join customers c
+    from sales as s
+    left join customers as c
         on s.customer_id = c.customer_id
-    left join products p
+    left join products as p
         on s.product_id = p.product_id
-    left join employees e
+    left join employees as e
         on s.sales_person_id = e.employee_id
     where p.price = 0
-    order by s.customer_id
+    order by 3
 )
 
 select
