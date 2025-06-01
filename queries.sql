@@ -34,8 +34,8 @@ left join products as p
     on s.product_id = p.product_id
 group by 1
 having
-    FLOOR(AVG(s.quantity * p.price)) <
-    (select total_average_income.avg_income from total_average_income)
+    FLOOR(AVG(s.quantity * p.price))
+    < (select total_average_income.avg_income from total_average_income)
 order by 2;
 
 --получаем информацию о выручке по дням недели
