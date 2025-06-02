@@ -28,10 +28,11 @@ left join products as p
 group by 1
 having
     FLOOR(AVG(s.quantity * p.price))
-    < (select AVG(sl.quantity * pr.price) as avg_income
-    from sales as sl
-    left join products as pr
-        on sl.product_id = pr.product_id
+    < (
+        select AVG(sl.quantity * pr.price) as avg_income
+        from sales as sl
+        left join products as pr
+            on sl.product_id = pr.product_id
     )
 order by 2;
 
@@ -45,8 +46,10 @@ left join employees as e
     on s.sales_person_id = e.employee_id
 left join products as p
     on s.product_id = p.product_id
-group by CONCAT(e.first_name, ' ', e.last_name), TO_CHAR(s.sale_date, 'day'), EXTRACT(isodow from s.sale_date)
-order by EXTRACT(isodow from s.sale_date), CONCAT(e.first_name, ' ', e.last_name);
+group by CONCAT(e.first_name, ' ', e.last_name), TO_CHAR(s.sale_date, 'day'),
+    EXTRACT(isodow from s.sale_date)
+order by EXTRACT(isodow from s.sale_date),
+    CONCAT(e.first_name, ' ', e.last_name);
 
 --считаем количество покупателей в возрастных группах: 16-25, 26-40 и 40+
 select
