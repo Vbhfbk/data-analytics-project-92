@@ -12,8 +12,8 @@ left join employees as e
     on s.sales_person_id = e.employee_id
 left join products as p
     on s.product_id = p.product_id
-group by 1
-order by 3 desc
+group by seller
+order by income desc
 limit 10;
 
 --выявляем продавцов, чья средняя выручка за сделку меньше средней
@@ -25,7 +25,7 @@ left join employees as e
     on s.sales_person_id = e.employee_id
 left join products as p
     on s.product_id = p.product_id
-group by 1
+group by seller
 having
     FLOOR(AVG(s.quantity * p.price))
     < (
@@ -34,7 +34,7 @@ having
         left join products as pr
             on sl.product_id = pr.product_id
     )
-order by 2;
+order by average_income;
 
 --получаем информацию о выручке по дням недели
 select
@@ -47,12 +47,12 @@ left join employees as e
 left join products as p
     on s.product_id = p.product_id
 group by
-    CONCAT(e.first_name, ' ', e.last_name),
-    TO_CHAR(s.sale_date, 'day'),
+    seller,
+    day_of_week,
     EXTRACT(isodow from s.sale_date)
 order by
     EXTRACT(isodow from s.sale_date),
-    CONCAT(e.first_name, ' ', e.last_name);
+    seller;
 
 --считаем количество покупателей в возрастных группах: 16-25, 26-40 и 40+
 select
@@ -63,8 +63,8 @@ select
     end) as age_category,
     COUNT(*) as age_count
 from customers as c
-group by 1
-order by 1;
+group by age_category
+order by age_category;
 
 --считаем данные по количеству уникальных покупателей и выручке 
 select
@@ -74,8 +74,8 @@ select
 from sales as s
 left join products as p
     on s.product_id = p.product_id
-group by 1
-order by 1;
+group by selling_month
+order by selling_month;
 
 --данные покупателей, первая покупка которых была в ходе проведения акций
 with tab as (
@@ -97,7 +97,7 @@ with tab as (
     left join employees as e
         on s.sales_person_id = e.employee_id
     where p.price = 0
-    order by 3
+    order by s.customer_id
 )
 
 select
