@@ -17,13 +17,6 @@ order by 3 desc
 limit 10;
 
 --выявляем продавцов, чья средняя выручка за сделку меньше средней
-with total_average_income as (
-    select AVG(s.quantity * p.price) as avg_income
-    from sales as s
-    left join products as p
-        on s.product_id = p.product_id
-)
-
 select
     CONCAT(e.first_name, ' ', e.last_name) as seller,
     FLOOR(AVG(s.quantity * p.price)) as average_income
@@ -35,36 +28,30 @@ left join products as p
 group by 1
 having
     FLOOR(AVG(s.quantity * p.price))
-    < (select total_average_income.avg_income from total_average_income)
+    < (select AVG(s.quantity * p.price) as avg_income
+    from sales as s
+    left join products as p
+        on s.product_id = p.product_id)
 order by 2;
 
 --получаем информацию о выручке по дням недели
-with ranged_data as (
-    select
-        CONCAT(e.first_name, ' ', e.last_name) as seller,
-        TO_CHAR(s.sale_date, 'day') as day_of_week,
-        FLOOR(SUM(s.quantity * p.price)) as income,
-        EXTRACT(isodow from s.sale_date) as number_of_day
-    from sales as s
-    left join employees as e
-        on s.sales_person_id = e.employee_id
-    left join products as p
-        on s.product_id = p.product_id
-    group by 1, 2, 4
-    order by 4, 1
-)
-
 select
-    seller,
-    day_of_week,
-    income
-from ranged_data;
+    CONCAT(e.first_name, ' ', e.last_name) as seller,
+    TO_CHAR(s.sale_date, 'day') as day_of_week,
+    FLOOR(SUM(s.quantity * p.price)) as income
+from sales as s
+left join employees as e
+    on s.sales_person_id = e.employee_id
+left join products as p
+    on s.product_id = p.product_id
+group by 1, 2, EXTRACT(isodow from s.sale_date)
+order by EXTRACT(isodow from s.sale_date), 1;
 
 --считаем количество покупателей в возрастных группах: 16-25, 26-40 и 40+
 select
     (case
-        when c.age >= 16 and c.age <= 25 then '16-25'
-        when c.age >= 26 and c.age <= 40 then '26-40'
+        when c.age between 16 and 25 then '16-25'
+        when c.age between 26 and 40 then '26-40'
         else '40+'
     end) as age_category,
     COUNT(*) as age_count
@@ -93,7 +80,7 @@ with tab as (
         CONCAT(e.first_name, ' ', e.last_name) as seller,
         ROW_NUMBER() over (
             partition by CONCAT(c.first_name, ' ', c.last_name)
-            order by s.sale_date, s.sales_id
+            order by s.sale_date
         ) as sales_number
     from sales as s
     left join customers as c
